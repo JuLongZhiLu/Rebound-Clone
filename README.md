@@ -1,13 +1,3 @@
-# Welcome to Defold
+https://forum.defold.com/t/i-found-a-very-interesting-game-and-i-want-to-try-cloning-it-using-defold/82178
 
-This project was created from the "empty" project template.
-
-The settings in ["game.project"](defold://open?path=/game.project) are all the default. A bootstrap empty ["main.collection"](defold://open?path=/main/main.collection) is included.
-
-Check out [the documentation pages](https://defold.com/learn) for examples, tutorials, manuals and API docs.
-
-If you run into trouble, help is available in [our forum](https://forum.defold.com).
-
-Happy Defolding!
-
----
+<img width="1202" height="839" alt="image" src="https://github.com/user-attachments/assets/854cce7f-bf59-46e6-b11f-6ec89e543685" />
