@@ -1,0 +1,52 @@
+-- ball.script
+go.property("active", true)
+
+function init(self)
+
+end
+
+function on_message(self, message_id, message, sender)
+	-- 1. 冻结：玩家碰到球
+	if message_id == hash("freeze_ball") then
+		self.active = false
+
+		-- 禁用物理组件，球会定格在当前空间位置
+		-- 既不会受重力下落，也不会响应碰撞
+		msg.post("#collisionobject", "disable")
+
+		-- 归零速度，防止再次启用时有残留惯性
+		self.velocity = vmath.vector3(0, 0, 0)
+
+		-- 2. 抛射：鼠标点击
+	elseif message_id == hash("throw_ball") then
+		local aim_target_pos = message.target_pos -- 玩家当前的位置
+		local horizontal_force = message.h_force or 500 -- 水平推力
+		local vertical_force = message.v_force or 300   -- 垂直抛力（决定抛物线高度）
+
+		self.active = true
+		msg.post("#collisionobject", "enable")
+
+		-- A. 计算水平方向向量 (在 X-Z 平面上)
+		local my_pos = go.get_position()
+		-- 向量：从球 -> 指向玩家
+		local dir = aim_target_pos - my_pos
+		dir.y = 0 -- 忽略高度差，只计算水平方向
+
+		if vmath.length_sqr(dir) > 0.001 then
+			dir = vmath.normalize(dir)
+		else
+			dir = vmath.vector3(0, 0, 1) -- 防止重合时的默认方向
+		end
+
+		-- B. 组合最终的冲量向量 (Impulse)
+		-- 水平方向 * 力度 + 垂直方向(Y轴) * 力度
+		local impulse = (dir * horizontal_force) + vmath.vector3(0, vertical_force, 0)
+
+		-- C. 施加力
+		msg.post("#collisionobject", "apply_force", { force = impulse, position = my_pos })
+
+		-- 【重要】防止球抛出瞬间立刻撞到玩家
+		-- 这里通常建议在抛出后的短时间内（如0.2秒）禁用球对玩家的碰撞检测
+		-- 或者依靠 impulse 把球快速推离玩家区域
+	end
+end

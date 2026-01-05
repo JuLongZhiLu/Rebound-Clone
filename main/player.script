@@ -1,0 +1,164 @@
+-- player.script
+
+-- 定义玩家的状态枚举
+local STATE_MOVE = 1
+local STATE_AIM  = 2 
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+	self.speed = 5
+	self.turn_speed = 30
+	self.input_vector = vmath.vector3()
+
+	self.target_rotation = go.get_rotation()
+
+	-- 记录当前正在播放的动画，防止重复播放
+	self.current_anim = nil 
+
+	self.state = STATE_MOVE
+	self.ball_id = nil		-- 记录被抓住的球的ID
+	self.angle = 0			-- 当前绕球的角度
+	self.radius = 100		-- 绕球半径（碰撞时的距离）
+	self.rotation_speed = 0.01 -- 鼠标灵敏度
+end
+
+-- 一个辅助函数，用来切换动画
+local function play_anim(self, anim_id)
+	
+	if self.current_anim == anim_id then 
+		return 
+	end
+
+	-- 打印调试信息：看看函数有没有被调用，以及要播什么
+	print("尝试切换动画到: " .. anim_id) -- <--- 看控制台有没有这行字
+
+	-- 给模型组件发送消息 
+	model.play_anim("#model", anim_id, go.PLAYBACK_LOOP_FORWARD)
+
+	-- 记录当前状态
+	self.current_anim = anim_id
+end
+
+function update(self, dt)
+
+	if self.state == STATE_AIM and self.ball_id then
+		-- 核心逻辑：让 Player 绕着 Ball 旋转
+		-- 获取球的位置
+		local ball_pos = go.get_position(self.ball_id)
+
+		-- 根据角度计算玩家的新位置 (极坐标转笛卡尔坐标)
+		local new_pos = vmath.vector3()
+		new_pos.x = ball_pos.x + math.cos(self.angle) * self.radius
+		new_pos.z = ball_pos.z + math.sin(self.angle) * self.radius
+		new_pos.y = ball_pos.y -- 保持深度一致
+
+		-- 设置玩家位置
+		go.set_position(new_pos)
+
+		-- 让玩家朝向球
+		local rot = vmath.quat_rotation_y(-self.angle + math.pi*1.5) -- +pi 是因为要面向球
+		go.set_rotation(rot)
+	end
+	
+	-- 判断是否有输入
+	local is_inputting = vmath.length_sqr(self.input_vector) > 0.1
+
+	if is_inputting then
+		-- 有输入时 -> 播放走路动画
+		play_anim(self, "Walk_Loop")
+
+		-- 计算旋转 (保持之前的逻辑)
+		local input_dir = vmath.normalize(self.input_vector)
+		local angle = math.atan2(-input_dir.x, -input_dir.z)
+		self.target_rotation = vmath.quat_rotation_y(angle)
+	else
+		-- 没输入时 -> 播放待机动画
+		play_anim(self, "Idle_Loop")
+	end
+
+	-- 平滑旋转
+	local current_rot = go.get_rotation()
+	local new_rot = vmath.slerp(dt * self.turn_speed, current_rot, self.target_rotation)
+	go.set_rotation(new_rot)
+
+	-- 移动逻辑
+	-- 计算点积，判断是否转到了大致方向
+	local q1 = current_rot
+	local q2 = self.target_rotation
+	local dot = q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w
+
+	-- 只要有输入，且朝向偏差不是极其巨大 ( > 0.5 相当于 60度以内)，就允许移动
+	-- 这样手感比较好，一边转一边走
+	if is_inputting and math.abs(dot) > 0.95 then
+		local move_dir = vmath.rotate(current_rot, vmath.vector3(0, 0, -1))
+		local pos = go.get_position()
+		go.set_position(pos + move_dir * -self.speed * dt)
+	end
+
+	-- 重置输入向量
+	self.input_vector = vmath.vector3(0, 0, 0)
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("left") then
+		self.input_vector.x = -1
+	elseif action_id == hash("right") then
+		self.input_vector.x = 1
+	elseif action_id == hash("forward") then
+		self.input_vector.z = -1
+	elseif action_id == hash("backward") then
+		self.input_vector.z = 1
+	end
+
+	-- 只有在瞄准（吸附）状态下才处理这些逻辑
+	if self.state == STATE_AIM and self.ball_id then
+
+		-- 1. 鼠标移动：改变角度
+		if not action_id then -- action_id 为 nil 通常表示鼠标移动
+			if action.dx then
+				-- 根据鼠标水平移动增量 action.dx 来增加或减少角度
+				self.angle = self.angle - action.dx * self.rotation_speed
+			end
+			-- 如果也想通过鼠标上下移动控制，可以加上 action.dy
+		end
+
+		-- 2. 鼠标点击：发射
+		if action_id == hash("touch") and action.pressed then
+			-- 发送抛球消息给球
+			msg.post(self.ball_id, "throw_ball", { 
+				target_pos = go.get_position(), -- 告诉球玩家现在的位置（即抛射方向）
+				h_force = -200,  -- 水平推力 (根据你的物体质量 dynamic mass 调整)
+				v_force = 100   -- 垂直推力 (制造抛物线)
+			})
+
+			-- 玩家状态重置（这里假设抛出后玩家恢复自由移动）
+			self.state = STATE_MOVE
+			self.ball_id = nil
+
+			-- 可选：给玩家一个反作用力或简单的位移，避免球刚生成物理就再次撞到玩家
+			-- 或者在几毫秒内忽略该球的碰撞
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	-- 处理碰撞
+	if message_id == hash("collision_response") then
+		-- 只有在移动状态下才检测碰撞，防止重复触发
+		if self.state == STATE_MOVE and message.group == hash("ball") then
+			self.state = STATE_AIM
+			self.ball_id = message.other_id --记录碰到的是哪个球
+
+			-- 通知球冻结
+			msg.post(self.ball_id, "freeze_ball")
+
+			-- 计算初始参数，保证切换平滑
+			local my_pos = go.get_position()
+			local ball_pos = go.get_position(self.ball_id)
+			local diff = my_pos - ball_pos
+
+			self.radius = vmath.length(diff) -- 锁定当前的距离为半径
+			self.angle = math.atan2(diff.y, diff.x) -- 计算当前的初始角度
+		end
+	end
+end

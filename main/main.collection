@@ -1,0 +1,215 @@
+name: "main"
+instances {
+  id: "camera3d"
+  prototype: "/scene3d/camera/camera3d.go"
+  position {
+    y: 9.0
+    z: -14.0
+  }
+  rotation {
+    x: -1.8858805E-17
+    y: -0.9513903
+    z: -0.30798766
+    w: 5.8255856E-17
+  }
+}
+instances {
+  id: "env_sky"
+  prototype: "/scene3d/prefabs/env/env_sky.go"
+  scale3 {
+    x: 200.0
+    y: 200.0
+    z: 200.0
+  }
+}
+instances {
+  id: "buildings_block_1x1"
+  prototype: "/scene3d/prefabs/buildings/buildings_block_1x1.go"
+  position {
+    z: -2.0
+  }
+  rotation {
+    x: 1.5075304E-16
+    y: -0.33324623
+    z: 5.88162E-17
+    w: 0.9428398
+  }
+}
+instances {
+  id: "buildings_wall_5x3"
+  prototype: "/assets/models/buildings_wall_5x3.go"
+  position {
+    x: -5.0
+  }
+  rotation {
+    y: 0.70710677
+    w: 0.70710677
+  }
+}
+instances {
+  id: "buildings_wall_5x"
+  prototype: "/assets/models/buildings_wall_5x3.go"
+  position {
+    x: 5.0
+  }
+  rotation {
+    y: 0.70710677
+    w: 0.70710677
+  }
+}
+instances {
+  id: "buildings_wall_5x1"
+  prototype: "/assets/models/buildings_wall_5x3.go"
+  position {
+    z: 5.0
+  }
+  rotation {
+    y: 1.0
+    w: 6.123234E-17
+  }
+}
+instances {
+  id: "buildings_wall_5x2"
+  prototype: "/assets/models/buildings_wall_5x3.go"
+  position {
+    z: -5.0
+  }
+  rotation {
+    y: 1.0
+    w: 6.123234E-17
+  }
+}
+instances {
+  id: "buildings_floor_10x10"
+  prototype: "/assets/models/buildings_floor_10x10.go"
+}
+scale_along_z: 0
+embedded_instances {
+  id: "environment"
+  children: "buildings_block_1x1"
+  children: "buildings_floor_10x10"
+  children: "buildings_wall_5x"
+  children: "buildings_wall_5x1"
+  children: "buildings_wall_5x2"
+  children: "buildings_wall_5x3"
+  children: "env_sky"
+  data: ""
+}
+embedded_instances {
+  id: "main"
+  data: "components {\n"
+  "  id: \"pointer_lock\"\n"
+  "  component: \"/pointer_lock/pointer_lock.script\"\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "ball"
+  data: "components {\n"
+  "  id: \"ball\"\n"
+  "  component: \"/main/ball.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"model\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/builtins/assets/meshes/sphere.dae\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"default\\\"\\n"
+  "  material: \\\"/builtins/materials/model.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/builtins/assets/images/logo/logo_256.png\\\"\\n"
+  "  }\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"collisionobject\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"type: COLLISION_OBJECT_TYPE_DYNAMIC\\n"
+  "mass: 0.5\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"ball\\\"\\n"
+  "mask: \\\"default\\\"\\n"
+  "mask: \\\"player\\\"\\n"
+  "embedded_collision_shape {\\n"
+  "  shapes {\\n"
+  "    shape_type: TYPE_SPHERE\\n"
+  "    position {\\n"
+  "    }\\n"
+  "    rotation {\\n"
+  "    }\\n"
+  "    index: 0\\n"
+  "    count: 1\\n"
+  "  }\\n"
+  "  data: 0.5\\n"
+  "}\\n"
+  "bullet: true\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: 3.0
+    y: 3.0
+  }
+}
+embedded_instances {
+  id: "player"
+  data: "components {\n"
+  "  id: \"player\"\n"
+  "  component: \"/main/player.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"model\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/meshes/exported-model.glb\\\"\\n"
+  "skeleton: \\\"/assets/meshes/exported-model.glb\\\"\\n"
+  "animations: \\\"/assets/meshes/exported-model.glb\\\"\\n"
+  "default_animation: \\\"Walk_Loop\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"M_Main.001\\\"\\n"
+  "  material: \\\"/builtins/materials/model_skinned.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/builtins/assets/images/logo/logo_256.png\\\"\\n"
+  "  }\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"collisionobject\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"type: COLLISION_OBJECT_TYPE_KINEMATIC\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"default\\\"\\n"
+  "mask: \\\"default\\\"\\n"
+  "mask: \\\"ball\\\"\\n"
+  "embedded_collision_shape {\\n"
+  "  shapes {\\n"
+  "    shape_type: TYPE_CAPSULE\\n"
+  "    position {\\n"
+  "      y: 1.0\\n"
+  "    }\\n"
+  "    rotation {\\n"
+  "    }\\n"
+  "    index: 0\\n"
+  "    count: 2\\n"
+  "  }\\n"
+  "  data: 0.5\\n"
+  "  data: 1.0\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  rotation {
+    x: 1.3525806E-16
+    y: -0.6965496
+    z: 3.6137335E-16
+    w: 0.7175087
+  }
+}
