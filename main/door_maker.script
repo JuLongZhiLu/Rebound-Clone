@@ -24,7 +24,7 @@ function spawn_door(self)
 	-- 这是一个简单的偏移量，让门不会刚好卡在边缘最角上 (根据你的模型大小调整)
 	local margin = 1.0 
 	local half_w = PLATFORM_WIDTH / 2
-	local half_d = PLATFORM_DEPTH / 2
+	local half_l = PLATFORM_LENGTH / 2
 
 	-- 生成一个在 [-范围, +范围] 之间的随机偏移值
 	local function get_random_offset(length) 
@@ -32,28 +32,32 @@ function spawn_door(self)
 	end
 
 	if selected_edge == 1 then
-		-- 北边 (Z轴负方向边缘)
+		-- 南边 (Z轴负方向边缘)
 		pos.x = get_random_offset(PLATFORM_WIDTH)
-		pos.z = -half_d
-		rot = vmath.quat_rotation_y(0) -- 面向 Z+ 或根据模型调整
+		pos.z = -half_l
+		-- rot = vmath.quat_rotation_y(0) -- 面向 Z+ 或根据模型调整
+		rot = vmath.quat_rotation_y(math.pi/2)
 
 	elseif selected_edge == 2 then
-		-- 东边 (X轴正方向边缘)
+		-- 西边 (X轴正方向边缘)
 		pos.x = half_w
-		pos.z = get_random_offset(PLATFORM_DEPTH)
+		pos.z = get_random_offset(PLATFORM_LENGTH)
+		-- rot = vmath.quat_rotation_y(math.pi / 2) -- 旋转90度
+		rot = vmath.quat_rotation_y(math.pi) -- 旋转180度
+		
+	elseif selected_edge == 3 then
+		-- 北边 (Z轴正方向边缘)
+		pos.x = get_random_offset(PLATFORM_WIDTH)
+		pos.z = half_l
+		-- rot = vmath.quat_rotation_y(math.pi) -- 旋转180度
 		rot = vmath.quat_rotation_y(math.pi / 2) -- 旋转90度
 
-	elseif selected_edge == 3 then
-		-- 南边 (Z轴正方向边缘)
-		pos.x = get_random_offset(PLATFORM_WIDTH)
-		pos.z = half_d
-		rot = vmath.quat_rotation_y(math.pi) -- 旋转180度
-
 	elseif selected_edge == 4 then
-		-- 西边 (X轴负方向边缘)
+		-- 东边 (X轴负方向边缘)
 		pos.x = -half_w
 		pos.z = get_random_offset(PLATFORM_LENGTH)
-		rot = vmath.quat_rotation_y(-math.pi / 2) -- 旋转-90度
+		-- rot = vmath.quat_rotation_y(-math.pi / 2) -- 旋转-90度
+		rot = vmath.quat_rotation_y(math.pi) -- 旋转180度
 	end
 
 	-- 4. 使用工厂生成门
@@ -71,13 +75,6 @@ function init(self)
 	spawn_door(self)
 end
 
-
-
-function final(self)
-	-- Add finalization code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
-end
 
 function on_message(self, message_id, message, sender)
 	-- 监听来自Door的消息
