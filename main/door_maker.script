@@ -1,0 +1,87 @@
+
+-- 定义平台的尺寸（假设平台中心在 0,0,0）
+local PLATFORM_WIDTH = 10  -- 比如平台宽10米
+local PLATFORM_LENGTH = 10  -- 比如平台长10米
+
+function spawn_door(self)
+	-- 确定可用的边（1:北，2:东，3:南，4:西）
+	local available_edges = {}
+	for i=1,4 do
+		-- 如果不是上一条边，就加入可选列表
+		if i ~= self.last_edge_index then
+			table.insert(available_edges,i)
+		end
+	end
+
+	-- 从剩下的边中随机选一条
+	local random_index = math.random(1, #available_edges)
+	local selected_edge = available_edges[random_index]
+
+	-- 3. 计算位置和旋转
+	local pos = vmath.vector3(0, 0.5, 0) -- y=0.5 假设门的高度修正
+	local rot = vmath.quat()
+
+	-- 这是一个简单的偏移量，让门不会刚好卡在边缘最角上 (根据你的模型大小调整)
+	local margin = 1.0 
+	local half_w = PLATFORM_WIDTH / 2
+	local half_d = PLATFORM_DEPTH / 2
+
+	-- 生成一个在 [-范围, +范围] 之间的随机偏移值
+	local function get_random_offset(length) 
+		return math.random() * (length - 2 * margin) - (length / 2 - margin)
+	end
+
+	if selected_edge == 1 then
+		-- 北边 (Z轴负方向边缘)
+		pos.x = get_random_offset(PLATFORM_WIDTH)
+		pos.z = -half_d
+		rot = vmath.quat_rotation_y(0) -- 面向 Z+ 或根据模型调整
+
+	elseif selected_edge == 2 then
+		-- 东边 (X轴正方向边缘)
+		pos.x = half_w
+		pos.z = get_random_offset(PLATFORM_DEPTH)
+		rot = vmath.quat_rotation_y(math.pi / 2) -- 旋转90度
+
+	elseif selected_edge == 3 then
+		-- 南边 (Z轴正方向边缘)
+		pos.x = get_random_offset(PLATFORM_WIDTH)
+		pos.z = half_d
+		rot = vmath.quat_rotation_y(math.pi) -- 旋转180度
+
+	elseif selected_edge == 4 then
+		-- 西边 (X轴负方向边缘)
+		pos.x = -half_w
+		pos.z = get_random_offset(PLATFORM_LENGTH)
+		rot = vmath.quat_rotation_y(-math.pi / 2) -- 旋转-90度
+	end
+
+	-- 4. 使用工厂生成门
+	-- 参数: url, position, rotation, properties, scale
+	factory.create("#door_factory", pos, rot)
+
+	print("Door spawned at edge: " .. selected_edge)
+end
+
+function init(self)
+	math.randomseed(os.time()) -- 初始化随机种子
+	self.last_edge_index = nil -- 初始没有上一条边
+
+	-- 游戏开始时生成第一个门
+	spawn_door(self)
+end
+
+
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function on_message(self, message_id, message, sender)
+	-- 监听来自Door的消息
+	if message_id == hash("door_destroyed") then
+		spawn_door(self)
+	end
+end

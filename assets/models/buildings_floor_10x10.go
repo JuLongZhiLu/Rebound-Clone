@@ -12,7 +12,7 @@ embedded_components {
   type: "collisionobject"
   data: "type: COLLISION_OBJECT_TYPE_STATIC\n"
   "mass: 0.0\n"
-  "friction: 0.5\n"
+  "friction: 5.0\n"
   "restitution: 0.5\n"
   "group: \"default\"\n"
   "mask: \"default\"\n"
@@ -33,15 +33,5 @@ embedded_components {
   "  data: 0.1\n"
   "  data: 5.0\n"
   "}\n"
-  ""
-}
-embedded_components {
-  id: "mesh"
-  type: "mesh"
-  data: "material: \"/scene3d/materials/basic_grid_timberwolf.material\"\n"
-  "vertices: \"/scene3d/assets/meshes/buildings_floor_10x10.buffer\"\n"
-  "textures: \"/scene3d/assets/textures/grid_20x20.png\"\n"
-  "position_stream: \"position\"\n"
-  "normal_stream: \"normal\"\n"
   ""
 }

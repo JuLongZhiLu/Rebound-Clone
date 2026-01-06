@@ -3,8 +3,8 @@ instances {
   id: "camera3d"
   prototype: "/scene3d/camera/camera3d.go"
   position {
-    y: 9.0
-    z: -14.0
+    y: 14.0
+    z: -16.0
   }
   rotation {
     x: -1.8858805E-17
@@ -20,19 +20,6 @@ instances {
     x: 200.0
     y: 200.0
     z: 200.0
-  }
-}
-instances {
-  id: "buildings_block_1x1"
-  prototype: "/scene3d/prefabs/buildings/buildings_block_1x1.go"
-  position {
-    z: -2.0
-  }
-  rotation {
-    x: 1.5075304E-16
-    y: -0.33324623
-    z: 5.88162E-17
-    w: 0.9428398
   }
 }
 instances {
@@ -83,16 +70,32 @@ instances {
   id: "buildings_floor_10x10"
   prototype: "/assets/models/buildings_floor_10x10.go"
 }
+instances {
+  id: "light_directional"
+  prototype: "/scene3d/camera/light_directional.go"
+  position {
+    y: 5.0
+  }
+  rotation {
+    x: -0.70710677
+    w: 0.70710677
+  }
+}
 scale_along_z: 0
 embedded_instances {
   id: "environment"
-  children: "buildings_block_1x1"
   children: "buildings_floor_10x10"
   children: "buildings_wall_5x"
   children: "buildings_wall_5x1"
   children: "buildings_wall_5x2"
   children: "buildings_wall_5x3"
   children: "env_sky"
+  children: "light_directional"
+  children: "other_platform"
+  children: "other_platform1"
+  children: "other_platform2"
+  children: "other_platform3"
+  children: "play_platform"
   data: ""
 }
 embedded_instances {
@@ -116,11 +119,7 @@ embedded_instances {
   "name: \\\"{{NAME}}\\\"\\n"
   "materials {\\n"
   "  name: \\\"default\\\"\\n"
-  "  material: \\\"/builtins/materials/model.material\\\"\\n"
-  "  textures {\\n"
-  "    sampler: \\\"tex0\\\"\\n"
-  "    texture: \\\"/builtins/assets/images/logo/logo_256.png\\\"\\n"
-  "  }\\n"
+  "  material: \\\"/scene3d/materials/basic_color.material\\\"\\n"
   "}\\n"
   "\"\n"
   "}\n"
@@ -129,11 +128,12 @@ embedded_instances {
   "  type: \"collisionobject\"\n"
   "  data: \"type: COLLISION_OBJECT_TYPE_DYNAMIC\\n"
   "mass: 0.5\\n"
-  "friction: 0.1\\n"
+  "friction: 10.0\\n"
   "restitution: 0.5\\n"
   "group: \\\"ball\\\"\\n"
   "mask: \\\"default\\\"\\n"
   "mask: \\\"player\\\"\\n"
+  "mask: \\\"door\\\"\\n"
   "embedded_collision_shape {\\n"
   "  shapes {\\n"
   "    shape_type: TYPE_SPHERE\\n"
@@ -154,6 +154,11 @@ embedded_instances {
     x: 3.0
     y: 3.0
   }
+  scale3 {
+    x: 0.8
+    y: 0.8
+    z: 0.8
+  }
 }
 embedded_instances {
   id: "player"
@@ -171,7 +176,7 @@ embedded_instances {
   "name: \\\"{{NAME}}\\\"\\n"
   "materials {\\n"
   "  name: \\\"M_Main.001\\\"\\n"
-  "  material: \\\"/builtins/materials/model_skinned.material\\\"\\n"
+  "  material: \\\"/assets/materials/model_skinned.material\\\"\\n"
   "  textures {\\n"
   "    sampler: \\\"tex0\\\"\\n"
   "    texture: \\\"/builtins/assets/images/logo/logo_256.png\\\"\\n"
@@ -211,5 +216,470 @@ embedded_instances {
     y: -0.6965496
     z: 3.6137335E-16
     w: 0.7175087
+  }
+}
+embedded_instances {
+  id: "door"
+  data: "components {\n"
+  "  id: \"door\"\n"
+  "  component: \"/main/door.script\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"collisionobject\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"type: COLLISION_OBJECT_TYPE_TRIGGER\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"door\\\"\\n"
+  "mask: \\\"default\\\"\\n"
+  "mask: \\\"ball\\\"\\n"
+  "embedded_collision_shape {\\n"
+  "  shapes {\\n"
+  "    shape_type: TYPE_BOX\\n"
+  "    position {\\n"
+  "    }\\n"
+  "    rotation {\\n"
+  "    }\\n"
+  "    index: 0\\n"
+  "    count: 3\\n"
+  "  }\\n"
+  "  data: 0.1\\n"
+  "  data: 1.0208116\\n"
+  "  data: 1.154074\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"model\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/meshes/door1.gltf\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"material_0\\\"\\n"
+  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/assets/models/door.png\\\"\\n"
+  "  }\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"collisionobject1\"\n"
+  "  type: \"collisionobject\"\n"
+  "  data: \"type: COLLISION_OBJECT_TYPE_STATIC\\n"
+  "mass: 0.0\\n"
+  "friction: 0.1\\n"
+  "restitution: 0.5\\n"
+  "group: \\\"default\\\"\\n"
+  "mask: \\\"default\\\"\\n"
+  "mask: \\\"ball\\\"\\n"
+  "embedded_collision_shape {\\n"
+  "  shapes {\\n"
+  "    shape_type: TYPE_BOX\\n"
+  "    position {\\n"
+  "      z: 1.5\\n"
+  "    }\\n"
+  "    rotation {\\n"
+  "    }\\n"
+  "    index: 0\\n"
+  "    count: 3\\n"
+  "  }\\n"
+  "  shapes {\\n"
+  "    shape_type: TYPE_BOX\\n"
+  "    position {\\n"
+  "      z: -1.5\\n"
+  "    }\\n"
+  "    rotation {\\n"
+  "    }\\n"
+  "    index: 3\\n"
+  "    count: 3\\n"
+  "  }\\n"
+  "  shapes {\\n"
+  "    shape_type: TYPE_BOX\\n"
+  "    position {\\n"
+  "      y: 1.5\\n"
+  "    }\\n"
+  "    rotation {\\n"
+  "      x: -0.70710677\\n"
+  "      w: 0.70710677\\n"
+  "    }\\n"
+  "    index: 6\\n"
+  "    count: 3\\n"
+  "  }\\n"
+  "  data: 0.330152\\n"
+  "  data: 1.2484185\\n"
+  "  data: 0.3120685\\n"
+  "  data: 0.330152\\n"
+  "  data: 1.2484185\\n"
+  "  data: 0.3120685\\n"
+  "  data: 0.330152\\n"
+  "  data: 1.7668155\\n"
+  "  data: 0.3120685\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    x: -4.5
+    y: 1.0
+    z: 2.0
+  }
+}
+embedded_instances {
+  id: "door_maker"
+  data: "components {\n"
+  "  id: \"door_maker\"\n"
+  "  component: \"/main/door_maker.script\"\n"
+  "}\n"
+  ""
+}
+embedded_instances {
+  id: "play_platform"
+  children: "platform"
+  children: "platform2"
+  data: ""
+}
+embedded_instances {
+  id: "platform"
+  data: "embedded_components {\n"
+  "  id: \"model\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/meshes/platform1.gltf\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"material_0\\\"\\n"
+  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/assets/models/platform1.png\\\"\\n"
+  "  }\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    y: -1.0
+  }
+  scale3 {
+    x: 1.7
+    z: 1.7
+  }
+}
+embedded_instances {
+  id: "platform2"
+  data: "embedded_components {\n"
+  "  id: \"model1\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/meshes/platform1.gltf\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"material_0\\\"\\n"
+  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/assets/models/platform1.png\\\"\\n"
+  "  }\\n"
+  "}\\n"
+  "\"\n"
+  "  position {\n"
+  "    y: -3.0\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    y: 11.0
+  }
+  scale3 {
+    x: 1.7
+    y: 5.0
+    z: 1.7
+  }
+}
+embedded_instances {
+  id: "other_platform"
+  children: "platform1"
+  children: "platform3"
+  data: ""
+  position {
+    x: -17.0
+    y: -27.0
+    z: 27.0
+  }
+  rotation {
+    x: 2.6757964E-16
+    y: -0.2630942
+    z: -6.7874917E-18
+    w: 0.96477014
+  }
+}
+embedded_instances {
+  id: "platform1"
+  data: "embedded_components {\n"
+  "  id: \"model\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/meshes/platform1.gltf\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"material_0\\\"\\n"
+  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/assets/models/platform1.png\\\"\\n"
+  "  }\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    y: -1.0
+  }
+  scale3 {
+    x: 1.7
+    z: 1.7
+  }
+}
+embedded_instances {
+  id: "platform3"
+  data: "embedded_components {\n"
+  "  id: \"model1\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/meshes/platform1.gltf\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"material_0\\\"\\n"
+  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/assets/models/platform1.png\\\"\\n"
+  "  }\\n"
+  "}\\n"
+  "\"\n"
+  "  position {\n"
+  "    y: -3.0\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    y: 47.0
+  }
+  scale3 {
+    x: 1.7
+    y: 20.0
+    z: 1.7
+  }
+}
+embedded_instances {
+  id: "other_platform1"
+  children: "platform4"
+  children: "platform5"
+  data: ""
+  position {
+    x: -17.0
+    y: -18.0
+    z: 9.0
+  }
+  rotation {
+    y: -0.087155744
+    w: 0.9961947
+  }
+}
+embedded_instances {
+  id: "platform4"
+  data: "embedded_components {\n"
+  "  id: \"model\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/meshes/platform1.gltf\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"material_0\\\"\\n"
+  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/assets/models/platform1.png\\\"\\n"
+  "  }\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    y: -1.0
+  }
+  scale3 {
+    x: 1.7
+    z: 1.7
+  }
+}
+embedded_instances {
+  id: "platform5"
+  data: "embedded_components {\n"
+  "  id: \"model1\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/meshes/platform1.gltf\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"material_0\\\"\\n"
+  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/assets/models/platform1.png\\\"\\n"
+  "  }\\n"
+  "}\\n"
+  "\"\n"
+  "  position {\n"
+  "    y: -3.0\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    y: 47.0
+  }
+  scale3 {
+    x: 1.7
+    y: 20.0
+    z: 1.7
+  }
+}
+embedded_instances {
+  id: "other_platform2"
+  children: "platform6"
+  children: "platform7"
+  data: ""
+  position {
+    x: 18.0
+    y: -27.0
+    z: 27.0
+  }
+  rotation {
+    y: 0.25881904
+    w: 0.9659258
+  }
+}
+embedded_instances {
+  id: "platform6"
+  data: "embedded_components {\n"
+  "  id: \"model\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/meshes/platform1.gltf\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"material_0\\\"\\n"
+  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/assets/models/platform1.png\\\"\\n"
+  "  }\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    y: -1.0
+  }
+  scale3 {
+    x: 1.7
+    z: 1.7
+  }
+}
+embedded_instances {
+  id: "platform7"
+  data: "embedded_components {\n"
+  "  id: \"model1\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/meshes/platform1.gltf\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"material_0\\\"\\n"
+  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/assets/models/platform1.png\\\"\\n"
+  "  }\\n"
+  "}\\n"
+  "\"\n"
+  "  position {\n"
+  "    y: -3.0\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    y: 47.0
+  }
+  scale3 {
+    x: 1.7
+    y: 20.0
+    z: 1.7
+  }
+}
+embedded_instances {
+  id: "other_platform3"
+  children: "platform8"
+  children: "platform9"
+  data: ""
+  position {
+    x: 17.0
+    y: -18.0
+    z: 9.0
+  }
+  rotation {
+    y: 0.087155744
+    w: 0.9961947
+  }
+}
+embedded_instances {
+  id: "platform8"
+  data: "embedded_components {\n"
+  "  id: \"model\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/meshes/platform1.gltf\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"material_0\\\"\\n"
+  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/assets/models/platform1.png\\\"\\n"
+  "  }\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    y: -1.0
+  }
+  scale3 {
+    x: 1.7
+    z: 1.7
+  }
+}
+embedded_instances {
+  id: "platform9"
+  data: "embedded_components {\n"
+  "  id: \"model1\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/assets/meshes/platform1.gltf\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"material_0\\\"\\n"
+  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/assets/models/platform1.png\\\"\\n"
+  "  }\\n"
+  "}\\n"
+  "\"\n"
+  "  position {\n"
+  "    y: -3.0\n"
+  "  }\n"
+  "}\n"
+  ""
+  position {
+    y: 47.0
+  }
+  scale3 {
+    x: 1.7
+    y: 20.0
+    z: 1.7
   }
 }
