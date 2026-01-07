@@ -20,6 +20,12 @@ function init(self)
 	self.angle = 0			-- 当前绕球的角度
 	self.radius = 100		-- 绕球半径（碰撞时的距离）
 	self.rotation_speed = 0.01 -- 鼠标灵敏度
+
+	-- 记录初始位置，这是为了得到初始时Y轴的数值
+	self.init_pos = go.get_position() 
+
+	-- 碰撞冷却计时器
+	self.collision_cooldown = 0 
 end
 
 -- 一个辅助函数，用来切换动画
@@ -39,7 +45,13 @@ local function play_anim(self, anim_id)
 	self.current_anim = anim_id
 end
 
+
 function update(self, dt)
+
+	-- 如果冷却时间大于0，就减去流逝的时间 dt
+	if self.collision_cooldown > 0 then
+		self.collision_cooldown = self.collision_cooldown - dt
+	end
 
 	if self.state == STATE_AIM and self.ball_id then
 		-- 核心逻辑：让 Player 绕着 Ball 旋转
@@ -59,6 +71,7 @@ function update(self, dt)
 		local rot = vmath.quat_rotation_y(-self.angle + math.pi*1.5) -- +pi 是因为要面向球
 		go.set_rotation(rot)
 	end
+
 	
 	-- 判断是否有输入
 	local is_inputting = vmath.length_sqr(self.input_vector) > 0.1
@@ -97,6 +110,11 @@ function update(self, dt)
 
 	-- 重置输入向量
 	self.input_vector = vmath.vector3(0, 0, 0)
+
+	-- 确保人物的在Y轴上的位置不变
+	local current_pos = go.get_position()
+	current_pos.y = self.init_pos.y
+	go.set_position(current_pos)
 end
 
 function on_input(self, action_id, action)
@@ -127,9 +145,13 @@ function on_input(self, action_id, action)
 			-- 发送抛球消息给球
 			msg.post(self.ball_id, "throw_ball", { 
 				target_pos = go.get_position(), -- 告诉球玩家现在的位置（即抛射方向）
-				h_force = -200,  -- 水平推力 (根据你的物体质量 dynamic mass 调整)
-				v_force = 100   -- 垂直推力 (制造抛物线)
+				h_force = -150,  -- 水平推力 (根据你的物体质量 dynamic mass 调整)
+				v_force = 150   -- 垂直推力 (制造抛物线)
 			})
+
+			-- 【关键修改】设置冷却时间（单位：秒）
+			-- 0.2秒内，脚本逻辑会忽略所有碰撞
+			self.collision_cooldown = 0.2
 
 			-- 玩家状态重置（这里假设抛出后玩家恢复自由移动）
 			self.state = STATE_MOVE
@@ -142,12 +164,18 @@ function on_input(self, action_id, action)
 end
 
 function on_message(self, message_id, message, sender)
+	-- 【关键修改】如果在冷却期内，直接无视这次碰撞
+	if self.collision_cooldown > 0 then
+		return -- 直接退出函数，不做任何处理
+	end
+	
 	-- 处理碰撞
 	if message_id == hash("collision_response") then
 		-- 只有在移动状态下才检测碰撞，防止重复触发
 		if self.state == STATE_MOVE and message.group == hash("ball") then
 			self.state = STATE_AIM
 			self.ball_id = message.other_id --记录碰到的是哪个球
+			print("碰到了球")
 
 			-- 通知球冻结
 			msg.post(self.ball_id, "freeze_ball")
@@ -156,8 +184,7 @@ function on_message(self, message_id, message, sender)
 			local my_pos = go.get_position()
 			local ball_pos = go.get_position(self.ball_id)
 			local diff = my_pos - ball_pos
-
-			self.radius = vmath.length(diff) -- 锁定当前的距离为半径
+			self.radius = 0.6
 			self.angle = math.atan2(diff.y, diff.x) -- 计算当前的初始角度
 		end
 	end

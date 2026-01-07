@@ -2,7 +2,7 @@
 go.property("active", true)
 
 function init(self)
-
+	self.init_pos_y = 0.5
 end
 
 function on_message(self, message_id, message, sender)
@@ -16,6 +16,12 @@ function on_message(self, message_id, message, sender)
 
 		-- 归零速度，防止再次启用时有残留惯性
 		self.velocity = vmath.vector3(0, 0, 0)
+
+		-- 确保玩家碰到球后，球自动到玩家脚旁边
+		local current_pos = go.get_position()
+		current_pos.y = self.init_pos_y
+		go.set_position(current_pos)
+		
 
 		-- 2. 抛射：鼠标点击
 	elseif message_id == hash("throw_ball") then

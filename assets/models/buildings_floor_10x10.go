@@ -14,7 +14,7 @@ embedded_components {
   "mass: 0.0\n"
   "friction: 5.0\n"
   "restitution: 0.5\n"
-  "group: \"default\"\n"
+  "group: \"platform\"\n"
   "mask: \"default\"\n"
   "mask: \"player\"\n"
   "mask: \"ball\"\n"
