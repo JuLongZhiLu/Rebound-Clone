@@ -90,7 +90,7 @@ embedded_components {
   "name: \"{{NAME}}\"\n"
   "materials {\n"
   "  name: \"material_0\"\n"
-  "  material: \"/assets/materials/model.material\"\n"
+  "  material: \"/light_and_shadows/materials/model/model_instanced.material\"\n"
   "  textures {\n"
   "    sampler: \"tex0\"\n"
   "    texture: \"/assets/textures/door.png\"\n"

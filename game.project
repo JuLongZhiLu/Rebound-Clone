@@ -1,6 +1,6 @@
 [bootstrap]
 main_collection = /main/main.collectionc
-render = /scene3d/render/render3d.renderc
+render = /light_and_shadows/render/default.renderc
 
 [script]
 shared_state = 1
@@ -20,6 +20,7 @@ scale_mode = stretch
 title = Rebound Clone
 dependencies#0 = https://github.com/indiesoftby/defold-pointer-lock/archive/refs/tags/2.0.0.zip
 dependencies#1 = https://github.com/indiesoftby/defold-scene3d/archive/refs/tags/1.2.1.zip
+dependencies#2 = https://github.com/Dragosha/defold-light-and-shadows/archive/master.zip
 
 [physics]
 type = 3D
@@ -32,4 +33,13 @@ ray_cast_limit_3d = 1000
 trigger_overlap_capacity = 1000
 max_fixed_timesteps = 1
 debug = 0
+
+[graphics]
+max_debug_vertices = 60000
+
+[model]
+max_count = 8192
+
+[collection]
+max_instances = 16384
 

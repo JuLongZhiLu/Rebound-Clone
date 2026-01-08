@@ -1,28 +1,5 @@
 name: "main"
 instances {
-  id: "camera3d"
-  prototype: "/scene3d/camera/camera3d.go"
-  position {
-    y: 14.0
-    z: -16.0
-  }
-  rotation {
-    x: -1.8858805E-17
-    y: -0.9513903
-    z: -0.30798766
-    w: 5.8255856E-17
-  }
-}
-instances {
-  id: "env_sky"
-  prototype: "/scene3d/prefabs/env/env_sky.go"
-  scale3 {
-    x: 200.0
-    y: 200.0
-    z: 200.0
-  }
-}
-instances {
   id: "buildings_wall_5x3"
   prototype: "/assets/models/buildings_wall_5x3.go"
   position {
@@ -67,14 +44,69 @@ instances {
   }
 }
 instances {
-  id: "light_directional"
-  prototype: "/scene3d/camera/light_directional.go"
+  id: "sun"
+  prototype: "/light_and_shadows/props/sun.go"
   position {
-    y: 5.0
+    y: 7.0
   }
-  rotation {
-    x: -0.70710677
-    w: 0.70710677
+  component_properties {
+    id: "sun"
+    properties {
+      id: "color"
+      value: "0.2, 0.2, 0.2, 0.0"
+      type: PROPERTY_TYPE_VECTOR4
+    }
+    properties {
+      id: "shadow"
+      value: "0.5, 0.5, 0.0, 0.0"
+      type: PROPERTY_TYPE_VECTOR4
+    }
+    properties {
+      id: "near"
+      value: "10.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+    properties {
+      id: "far"
+      value: "500.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+    properties {
+      id: "perspective"
+      value: "true"
+      type: PROPERTY_TYPE_BOOLEAN
+    }
+    properties {
+      id: "max_lights"
+      value: "6.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+  }
+}
+instances {
+  id: "bulb"
+  prototype: "/light_and_shadows/props/bulb.go"
+  position {
+    y: -4.0
+    z: -10.0
+  }
+  component_properties {
+    id: "bulb"
+    properties {
+      id: "color"
+      value: "1.0, 1.0, 1.0, 1.0"
+      type: PROPERTY_TYPE_VECTOR4
+    }
+    properties {
+      id: "angle"
+      value: "0.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
+    properties {
+      id: "num"
+      value: "2.0"
+      type: PROPERTY_TYPE_NUMBER
+    }
   }
 }
 scale_along_z: 0
@@ -84,8 +116,6 @@ embedded_instances {
   children: "buildings_wall_5x1"
   children: "buildings_wall_5x2"
   children: "buildings_wall_5x3"
-  children: "env_sky"
-  children: "light_directional"
   children: "other_platform"
   children: "other_platform1"
   children: "other_platform2"
@@ -99,10 +129,40 @@ embedded_instances {
   "  id: \"pointer_lock\"\n"
   "  component: \"/pointer_lock/pointer_lock.script\"\n"
   "}\n"
+  "components {\n"
+  "  id: \"light_setting\"\n"
+  "  component: \"/light_and_shadows/light_setting.script\"\n"
+  "  properties {\n"
+  "    id: \"clear_color\"\n"
+  "    value: \"0.05, 0.09, 0.13, 0.0\"\n"
+  "    type: PROPERTY_TYPE_VECTOR4\n"
+  "  }\n"
+  "  properties {\n"
+  "    id: \"fog_color\"\n"
+  "    value: \"0.05, 0.1, 0.3, 0.0\"\n"
+  "    type: PROPERTY_TYPE_VECTOR4\n"
+  "  }\n"
+  "  properties {\n"
+  "    id: \"fog_density\"\n"
+  "    value: \"0.8\"\n"
+  "    type: PROPERTY_TYPE_NUMBER\n"
+  "  }\n"
+  "  properties {\n"
+  "    id: \"ambient\"\n"
+  "    value: \"0.2, 0.2, 0.3, 0.0\"\n"
+  "    type: PROPERTY_TYPE_VECTOR4\n"
+  "  }\n"
+  "  properties {\n"
+  "    id: \"color_max\"\n"
+  "    value: \"1.1\"\n"
+  "    type: PROPERTY_TYPE_NUMBER\n"
+  "  }\n"
+  "}\n"
   ""
 }
 embedded_instances {
   id: "ball"
+  children: "shadow"
   data: "components {\n"
   "  id: \"ball\"\n"
   "  component: \"/main/ball.script\"\n"
@@ -114,7 +174,11 @@ embedded_instances {
   "name: \\\"{{NAME}}\\\"\\n"
   "materials {\\n"
   "  name: \\\"default\\\"\\n"
-  "  material: \\\"/scene3d/materials/basic_color.material\\\"\\n"
+  "  material: \\\"/light_and_shadows/materials/model/model_instanced_nocast.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/scene3d/assets/ui/white.png\\\"\\n"
+  "  }\\n"
   "}\\n"
   "\"\n"
   "}\n"
@@ -181,7 +245,7 @@ embedded_instances {
   "name: \\\"{{NAME}}\\\"\\n"
   "materials {\\n"
   "  name: \\\"M_Main.001\\\"\\n"
-  "  material: \\\"/assets/materials/model_skinned.material\\\"\\n"
+  "  material: \\\"/light_and_shadows/materials/model/skinned/model_skinned.material\\\"\\n"
   "  textures {\\n"
   "    sampler: \\\"tex0\\\"\\n"
   "    texture: \\\"/builtins/assets/images/logo/logo_256.png\\\"\\n"
@@ -271,7 +335,7 @@ embedded_instances {
   "name: \\\"{{NAME}}\\\"\\n"
   "materials {\\n"
   "  name: \\\"material_0\\\"\\n"
-  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  material: \\\"/light_and_shadows/materials/model/model_instanced.material\\\"\\n"
   "  textures {\\n"
   "    sampler: \\\"tex0\\\"\\n"
   "    texture: \\\"/assets/textures/platform1.png\\\"\\n"
@@ -325,7 +389,7 @@ embedded_instances {
   "name: \\\"{{NAME}}\\\"\\n"
   "materials {\\n"
   "  name: \\\"material_0\\\"\\n"
-  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  material: \\\"/light_and_shadows/materials/model/model_instanced.material\\\"\\n"
   "  textures {\\n"
   "    sampler: \\\"tex0\\\"\\n"
   "    texture: \\\"/assets/textures/platform1.png\\\"\\n"
@@ -352,15 +416,20 @@ embedded_instances {
   children: "platform3"
   data: ""
   position {
-    x: -17.0
-    y: -27.0
-    z: 27.0
+    x: -15.0
+    y: -40.0
+    z: 31.0
   }
   rotation {
     x: 2.6757964E-16
     y: -0.2630942
     z: -6.7874917E-18
     w: 0.96477014
+  }
+  scale3 {
+    x: 0.5
+    y: 0.3
+    z: 0.5
   }
 }
 embedded_instances {
@@ -372,7 +441,7 @@ embedded_instances {
   "name: \\\"{{NAME}}\\\"\\n"
   "materials {\\n"
   "  name: \\\"material_0\\\"\\n"
-  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  material: \\\"/light_and_shadows/materials/model/model_instanced.material\\\"\\n"
   "  textures {\\n"
   "    sampler: \\\"tex0\\\"\\n"
   "    texture: \\\"/assets/textures/platform1.png\\\"\\n"
@@ -398,7 +467,7 @@ embedded_instances {
   "name: \\\"{{NAME}}\\\"\\n"
   "materials {\\n"
   "  name: \\\"material_0\\\"\\n"
-  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  material: \\\"/light_and_shadows/materials/model/model_instanced.material\\\"\\n"
   "  textures {\\n"
   "    sampler: \\\"tex0\\\"\\n"
   "    texture: \\\"/assets/textures/platform1.png\\\"\\n"
@@ -425,12 +494,12 @@ embedded_instances {
   children: "platform5"
   data: ""
   position {
-    x: -17.0
-    y: -18.0
-    z: 9.0
+    x: -19.0
+    y: -51.0
+    z: 30.0
   }
   rotation {
-    y: -0.087155744
+    y: 0.087155744
     w: 0.9961947
   }
 }
@@ -443,7 +512,7 @@ embedded_instances {
   "name: \\\"{{NAME}}\\\"\\n"
   "materials {\\n"
   "  name: \\\"material_0\\\"\\n"
-  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  material: \\\"/light_and_shadows/materials/model/model_instanced.material\\\"\\n"
   "  textures {\\n"
   "    sampler: \\\"tex0\\\"\\n"
   "    texture: \\\"/assets/textures/platform1.png\\\"\\n"
@@ -469,7 +538,7 @@ embedded_instances {
   "name: \\\"{{NAME}}\\\"\\n"
   "materials {\\n"
   "  name: \\\"material_0\\\"\\n"
-  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  material: \\\"/light_and_shadows/materials/model/model_instanced.material\\\"\\n"
   "  textures {\\n"
   "    sampler: \\\"tex0\\\"\\n"
   "    texture: \\\"/assets/textures/platform1.png\\\"\\n"
@@ -496,13 +565,18 @@ embedded_instances {
   children: "platform7"
   data: ""
   position {
-    x: 18.0
-    y: -27.0
-    z: 27.0
+    x: 14.0
+    y: -35.0
+    z: 30.0
   }
   rotation {
     y: 0.25881904
     w: 0.9659258
+  }
+  scale3 {
+    x: 0.5
+    y: 0.3
+    z: 0.5
   }
 }
 embedded_instances {
@@ -514,7 +588,7 @@ embedded_instances {
   "name: \\\"{{NAME}}\\\"\\n"
   "materials {\\n"
   "  name: \\\"material_0\\\"\\n"
-  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  material: \\\"/light_and_shadows/materials/model/model_instanced.material\\\"\\n"
   "  textures {\\n"
   "    sampler: \\\"tex0\\\"\\n"
   "    texture: \\\"/assets/textures/platform1.png\\\"\\n"
@@ -540,7 +614,7 @@ embedded_instances {
   "name: \\\"{{NAME}}\\\"\\n"
   "materials {\\n"
   "  name: \\\"material_0\\\"\\n"
-  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  material: \\\"/light_and_shadows/materials/model/model_instanced.material\\\"\\n"
   "  textures {\\n"
   "    sampler: \\\"tex0\\\"\\n"
   "    texture: \\\"/assets/textures/platform1.png\\\"\\n"
@@ -567,9 +641,9 @@ embedded_instances {
   children: "platform9"
   data: ""
   position {
-    x: 17.0
-    y: -18.0
-    z: 9.0
+    x: 18.0
+    y: -46.0
+    z: 26.0
   }
   rotation {
     y: 0.087155744
@@ -585,7 +659,7 @@ embedded_instances {
   "name: \\\"{{NAME}}\\\"\\n"
   "materials {\\n"
   "  name: \\\"material_0\\\"\\n"
-  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  material: \\\"/light_and_shadows/materials/model/model_instanced.material\\\"\\n"
   "  textures {\\n"
   "    sampler: \\\"tex0\\\"\\n"
   "    texture: \\\"/assets/textures/platform1.png\\\"\\n"
@@ -611,7 +685,7 @@ embedded_instances {
   "name: \\\"{{NAME}}\\\"\\n"
   "materials {\\n"
   "  name: \\\"material_0\\\"\\n"
-  "  material: \\\"/assets/materials/model.material\\\"\\n"
+  "  material: \\\"/light_and_shadows/materials/model/model_instanced.material\\\"\\n"
   "  textures {\\n"
   "    sampler: \\\"tex0\\\"\\n"
   "    texture: \\\"/assets/textures/platform1.png\\\"\\n"
@@ -630,5 +704,62 @@ embedded_instances {
     x: 1.7
     y: 20.0
     z: 1.7
+  }
+}
+embedded_instances {
+  id: "camera"
+  data: "embedded_components {\n"
+  "  id: \"camera\"\n"
+  "  type: \"camera\"\n"
+  "  data: \"aspect_ratio: 1.0\\n"
+  "fov: 0.4\\n"
+  "near_z: 0.1\\n"
+  "far_z: 1000.0\\n"
+  "auto_aspect_ratio: 1\\n"
+  "\"\n"
+  "}\n"
+  ""
+  position {
+    y: 25.0
+    z: -25.0
+  }
+  rotation {
+    x: -2.3432602E-17
+    y: 0.9238795
+    z: 0.38268343
+    w: 5.6571306E-17
+  }
+}
+embedded_instances {
+  id: "lights"
+  children: "bulb"
+  children: "sun"
+  data: ""
+  position {
+    y: 21.0
+  }
+}
+embedded_instances {
+  id: "shadow"
+  data: "embedded_components {\n"
+  "  id: \"model1\"\n"
+  "  type: \"model\"\n"
+  "  data: \"mesh: \\\"/builtins/assets/meshes/sphere.dae\\\"\\n"
+  "name: \\\"{{NAME}}\\\"\\n"
+  "materials {\\n"
+  "  name: \\\"default\\\"\\n"
+  "  material: \\\"/light_and_shadows/materials/model/model_instanced.material\\\"\\n"
+  "  textures {\\n"
+  "    sampler: \\\"tex0\\\"\\n"
+  "    texture: \\\"/scene3d/assets/ui/white.png\\\"\\n"
+  "  }\\n"
+  "}\\n"
+  "\"\n"
+  "}\n"
+  ""
+  scale3 {
+    x: 0.8
+    y: 0.8
+    z: 0.8
   }
 }
