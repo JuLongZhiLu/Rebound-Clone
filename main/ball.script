@@ -1,8 +1,22 @@
 -- ball.script
 go.property("active", true)
 
+-- 新增属性：定义触发声音的最小撞击速度
+-- 如果球仅仅是在地上滚动，垂直速度很小，就不应该播放声音
+go.property("impact_threshold", 0.6) 
+
 function init(self)
 	self.init_pos_y = 0.5
+
+	-- 新增：声音冷却计时器
+	self.sound_cooldown = 0
+end
+
+function update(self, dt)
+	-- 新增：更新冷却时间
+	if self.sound_cooldown > 0 then
+		self.sound_cooldown = self.sound_cooldown - dt
+	end
 end
 
 function on_message(self, message_id, message, sender)
@@ -54,5 +68,27 @@ function on_message(self, message_id, message, sender)
 		-- 【重要】防止球抛出瞬间立刻撞到玩家
 		-- 这里通常建议在抛出后的短时间内（如0.2秒）禁用球对玩家的碰撞检测
 		-- 或者依靠 impulse 把球快速推离玩家区域
+		-- 3. 新增：处理碰撞逻辑
+	elseif message_id == hash("contact_point_response") then
+		-- 只有当球处于 active 状态且冷却时间已过时才检测
+		if self.active and self.sound_cooldown <= 0 and message.group == hash("platform") then
+
+			-- 撞击速度计算：
+			-- relative_velocity 是相对速度向量
+			-- message.normal 是碰撞法线（地面通常是指向上的）
+			-- vmath.dot 点积可以计算出在法线方向上的速度分量（即垂直撞击力度）
+			local impact_speed = vmath.dot(message.relative_velocity, message.normal)
+			print("impact_speed" .. impact_speed)
+			-- 注意：当球撞向地面时，相对速度通常与法线方向相反，点积结果为负数。
+			-- 我们只需要判断是否“足够猛烈”地撞击
+			if impact_speed < -self.impact_threshold then
+
+				-- 播放声音 (假设你的 sound 组件叫 "sound")
+				msg.post("#sound", "play_sound")
+
+				-- 设置冷却时间，防止 0.1 秒内连续触发（消除刺耳的重叠声）
+				self.sound_cooldown = 0.1
+			end
+		end
 	end
 end

@@ -142,6 +142,8 @@ function on_input(self, action_id, action)
 
 		-- 2. 鼠标点击：发射
 		if action_id == hash("touch") and action.pressed then
+			msg.post("#throw_ball_sound", "play_sound")
+			
 			-- 发送抛球消息给球
 			msg.post(self.ball_id, "throw_ball", { 
 				target_pos = go.get_position(), -- 告诉球玩家现在的位置（即抛射方向）
@@ -176,6 +178,8 @@ function on_message(self, message_id, message, sender)
 			self.state = STATE_AIM
 			self.ball_id = message.other_id --记录碰到的是哪个球
 			print("碰到了球")
+
+			msg.post("#pickup_ball_sound", "play_sound")
 
 			-- 通知球冻结
 			msg.post(self.ball_id, "freeze_ball")

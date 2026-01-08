@@ -93,7 +93,7 @@ embedded_components {
   "  material: \"/assets/materials/model.material\"\n"
   "  textures {\n"
   "    sampler: \"tex0\"\n"
-  "    texture: \"/assets/models/door.png\"\n"
+  "    texture: \"/assets/textures/door.png\"\n"
   "  }\n"
   "}\n"
   ""
