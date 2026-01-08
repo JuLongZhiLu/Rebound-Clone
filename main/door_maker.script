@@ -1,7 +1,7 @@
 
 -- 定义平台的尺寸（假设平台中心在 0,0,0）
-local PLATFORM_WIDTH = 10  -- 比如平台宽10米
-local PLATFORM_LENGTH = 10  -- 比如平台长10米
+local PLATFORM_WIDTH = 9.5  -- 比如平台宽9.5米
+local PLATFORM_LENGTH = 9.5  -- 比如平台长9.5米
 
 function spawn_door(self)
 	-- 确定可用的边（1:北，2:东，3:南，4:西）

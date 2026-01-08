@@ -6,7 +6,7 @@ go.property("active", true)
 go.property("impact_threshold", 0.6) 
 
 function init(self)
-	self.init_pos_y = 0.5
+	self.init_pos_y = -0.2
 
 	-- 新增：声音冷却计时器
 	self.sound_cooldown = 0
