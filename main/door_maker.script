@@ -62,8 +62,16 @@ function spawn_door(self)
 
 	-- 4. 使用工厂生成门
 	-- 参数: url, position, rotation, properties, scale
-	factory.create("#door_factory", pos, rot)
-
+	local door_id = factory.create("#door_factory", pos, rot)
+	go.set_scale(0.1, door_id)
+	
+	-- 5. 播放动画：scale 从 0 变到 1
+	-- 参数说明：
+	-- delay: 0 (立即开始)
+	-- duration: 0.5 (动画耗时0.5秒)
+	-- easing: go.EASING_OUTBACK (带一点回弹效果，看起来像“蹦”出来的)
+	go.animate(door_id, "scale", go.PLAYBACK_ONCE_FORWARD, 1, go.EASING_OUTBACK, 0.5)
+	
 	print("Door spawned at edge: " .. selected_edge)
 end
 
