@@ -1,10 +1,23 @@
 function init(self)
 	self.triggered = false
+
+	-- 边缘撞击的冷却时间，防止0.1秒内连续播放声音
+	self.edge_hit_cooldown = 0
+end
+
+function update(self, dt)
+	-- 更新冷却时间
+	if self.edge_hit_cooldown > 0 then
+		self.edge_hit_cooldown = self.edge_hit_cooldown - dt
+	end
 end
 
 
 
 function on_message(self, message_id, message, sender)
+	-- =========================================================================
+	-- 逻辑 1：通关触发 (Trigger) - 球碰到门中间的触发器
+	-- =========================================================================
 	if message_id == hash("trigger_response") then
 
 		-- 防止重复触发
@@ -33,6 +46,35 @@ function on_message(self, message_id, message, sender)
 				go.delete()
 			end)
 
+		end
+	-- =========================================================================
+	-- 逻辑 2：物理撞击 (Contact) - 球撞到门框 (#collisionobject1)
+	-- =========================================================================
+	elseif message_id == hash("contact_point_response") then
+
+		-- 1. 检查是不是球撞过来的
+		-- 2. 检查是不是撞到了门框组件 (sender 是组件的 URL)
+		-- 3. 检查冷却时间
+		if message.group == hash("ball") and sender == msg.url("#collisionobject1") and self.edge_hit_cooldown <= 0 then
+
+			-- A. 播放撞击音效
+			msg.post("#ball_hit_door_edge_sound", "play_sound")
+
+			-- B. 门框晃动动画
+			-- 获取当前旋转角度
+			local current_euler = go.get(".", "euler")
+
+			-- 设定晃动目标：在 X 轴上偏转 10 度 
+			-- 绕 X 轴晃动就像门被撞得“扭”了一下
+			local shake_offset = vmath.vector3(0, 0, 10) 
+			local target_euler = current_euler + shake_offset
+
+			-- 使用 PINGPONG 模式：晃过去(0.05s) 再 晃回来(0.05s)
+			-- 使用 EASING_OUTBOUNCE 增加震动感
+			go.animate(".", "euler", go.PLAYBACK_ONCE_PINGPONG, target_euler, go.EASING_OUTBOUNCE, 0.1)
+
+			-- C. 重置冷却时间 (防止连续多帧触发)
+			self.edge_hit_cooldown = 0.3
 		end
 	end
 end

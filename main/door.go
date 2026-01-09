@@ -98,3 +98,9 @@ embedded_components {
   "}\n"
   ""
 }
+embedded_components {
+  id: "ball_hit_door_edge_sound"
+  type: "sound"
+  data: "sound: \"/assets/sounds/ball_hit door_edge.ogg\"\n"
+  ""
+}
