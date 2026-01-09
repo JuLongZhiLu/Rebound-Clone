@@ -8,14 +8,61 @@ go.property("impact_threshold", 0.6)
 function init(self)
 	self.init_pos_y = -0.2
 
-	-- 新增：声音冷却计时器
+	-- 声音冷却计时器
 	self.sound_cooldown = 0
+
+	-- 粒子（拖尾）冷却计时器
+	self.particle_cooldown = 0
+
+	-- 初始化随机数种子，保证每次运行碎片方向不同
+	math.randomseed(os.time())
 end
 
 function update(self, dt)
-	-- 新增：更新冷却时间
+	-- 更新声音冷却时间
 	if self.sound_cooldown > 0 then
 		self.sound_cooldown = self.sound_cooldown - dt
+	end
+	
+	-- 更新声音冷却时间
+	if self.particle_cooldown > 0 then
+		self.particle_cooldown = self.particle_cooldown - dt
+	end
+
+	-- ============================================================
+	-- 水平速度检测与拖尾生成逻辑
+	-- ============================================================
+
+	-- 仅当球处于激活状态且冷却结束时才生成
+	if self.active and self.particle_cooldown <= 0 then
+		-- 获取当前物理引擎计算出的线性速度
+		local velocity = go.get("#collisionobject", "linear_velocity")
+
+		-- 消除 Y 轴影响，只计算水平面（X-Z）的速度
+		local h_velocity = vmath.vector3(velocity.x, 0, velocity.z)
+
+		-- 计算水平速度的大小
+		local h_speed = vmath.length(h_velocity)
+
+		-- 设置一个最小阈值（例如 0.1），防止球静止或极其缓慢移动时也生成
+		if h_speed > 0.1 then
+			-- A. 生成球体 (假设 factory ID 为 "particle_factory")
+			local pos = go.get_position()
+			local p_id = factory.create("#ball_trail_particle_factory", pos)
+
+			-- B. 设置初始大小为 0.6
+			go.set_scale(0.6, p_id)
+
+			-- C. 动画：大小从 0.6 变到 0，耗时 1秒 (可调整)，完成后删除
+			-- 使用 go.EASING_OUTQUAD 让缩小过程看起来更自然
+			go.animate(p_id, "scale", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_OUTQUAD, 1, 0, function()
+				-- 动画完成后的回调：删除生成的对象
+				go.delete(p_id)
+			end)
+
+			-- D. 重置冷却时间 (控制生成密度，0.15秒生成一个)
+			self.particle_cooldown = 0.15
+		end
 	end
 end
 
@@ -71,7 +118,7 @@ function on_message(self, message_id, message, sender)
 		-- 3. 新增：处理碰撞逻辑
 	elseif message_id == hash("contact_point_response") then
 		-- 只有当球处于 active 状态且冷却时间已过时才检测
-		if self.active and self.sound_cooldown <= 0 and message.group == hash("platform") then
+		if self.active  and message.group == hash("platform") then
 
 			-- 撞击速度计算：
 			-- relative_velocity 是相对速度向量
@@ -83,11 +130,43 @@ function on_message(self, message_id, message, sender)
 			-- 我们只需要判断是否“足够猛烈”地撞击
 			if impact_speed < -self.impact_threshold then
 
-				-- 播放声音 (假设你的 sound 组件叫 "sound")
-				msg.post("#sound", "play_sound")
+				if self.sound_cooldown <= 0 then
+					-- 播放声音 (假设你的 sound 组件叫 "sound")
+					msg.post("#sound", "play_sound")
+					-- 设置冷却时间，防止 0.1 秒内连续触发（消除刺耳的重叠声）
+					self.sound_cooldown = 0.1
+				end
 
-				-- 设置冷却时间，防止 0.1 秒内连续触发（消除刺耳的重叠声）
-				self.sound_cooldown = 0.1
+				-- ==========================================================
+				-- 新增：撞击飞溅碎片逻辑
+				-- ==========================================================
+				print("触发撞击飞溅碎片")
+				local splat_count = math.random(4, 7) -- 随机生成 4 到 7 个碎片
+				
+				for i = 1, splat_count do
+					-- 抬高生成位置：让粒子从地面上方 0.1 处产生，防止被地板遮挡
+					local spawn_pos = message.position + vmath.vector3(0, 0.1, 0)
+					-- A. 在碰撞点（message.position）生成碎片，而不是球心
+					local p_id = factory.create("#ball_impact_particle_factory", spawn_pos)
+
+					-- B. 设置大小为 0.1
+					go.set_scale(0.1, p_id)
+					
+					-- C. 计算随机水平方向 (极坐标转笛卡尔坐标)
+					local angle = math.random() * 2 * math.pi -- 0 到 360 度
+					local dist = math.random() * 0.3    -- 飞溅距离：0.0 到 0.3 不等
+
+					-- 组合目标位置：原点 + 方向偏移
+					local target_offset = vmath.vector3(math.cos(angle) * dist, 0, math.sin(angle) * dist)
+					local target_pos = message.position + target_offset
+
+					-- D. 动画：0.5秒内移动到目标位置，完成后删除
+					-- 使用 EASING_OUT_CIRC 或 QUAD 让它看起来像是有阻力的滑动
+					go.animate(p_id, "position", go.PLAYBACK_ONCE_FORWARD, target_pos, go.EASING_OUTQUAD, 0.3, 0, function()
+						go.delete(p_id)
+					end)
+				end
+				-- ==========================================================
 			end
 		end
 	end

@@ -87,8 +87,7 @@ instances {
   id: "bulb"
   prototype: "/light_and_shadows/props/bulb.go"
   position {
-    y: -4.0
-    z: -10.0
+    y: -14.0
   }
   component_properties {
     id: "bulb"
@@ -96,6 +95,11 @@ instances {
       id: "color"
       value: "1.0, 1.0, 1.0, 1.0"
       type: PROPERTY_TYPE_VECTOR4
+    }
+    properties {
+      id: "power"
+      value: "100.0"
+      type: PROPERTY_TYPE_NUMBER
     }
     properties {
       id: "angle"
@@ -216,6 +220,18 @@ embedded_instances {
   "  type: \"sound\"\n"
   "  data: \"sound: \\\"/assets/sounds/ball.ogg\\\"\\n"
   "gain: 5.0\\n"
+  "\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"ball_trail_particle_factory\"\n"
+  "  type: \"factory\"\n"
+  "  data: \"prototype: \\\"/main/ball_particle.go\\\"\\n"
+  "\"\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"ball_impact_particle_factory\"\n"
+  "  type: \"factory\"\n"
+  "  data: \"prototype: \\\"/main/ball_particle.go\\\"\\n"
   "\"\n"
   "}\n"
   ""
