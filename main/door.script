@@ -1,14 +1,29 @@
 function init(self)
-	-- Add initialization code here
-	-- Learn more: https://defold.com/manuals/script/
-	-- Remove this function if not needed
+	self.triggered = false
 end
 
 
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("trigger_response") then
-		if message.group == hash("ball") then
+
+		-- 防止重复触发
+		if message.group == hash("ball") and not self.triggered then
+
+			-- 立即禁用碰撞，防止后续多次判定
+			msg.post("#collisionobject", "disable")
+			
+			-- ==========================================================
+			-- 闪光效果：瞬间设置一个超亮的 tint
+			-- ==========================================================
+			-- 原理：将 RGB 设为 8.0，不仅是变白，还会因为过曝产生发光感
+			-- go.animate("#model", "tint", go.PLAYBACK_ONCE_FORWARD, vmath.vector4(1,1,1,1), go.EASING_OUTQUAD, 0.1, 0)
+			local flash_tint = vmath.vector4(8, 8, 8, 1) 
+			go.set("#model", "tint", flash_tint)
+
+			-- 如果你希望它闪一下变白，然后在缩小过程中慢慢恢复正常颜色，可以加上这一句：
+			go.animate("#model", "tint", go.PLAYBACK_ONCE_FORWARD, vmath.vector4(1,1,1,1), go.EASING_OUTQUAD, 0.3)
+
 			-- 参数: 自身("."), 属性("scale"), 播放方式, 目标值(0), 缓动类型, 耗时(0.3秒), 延迟(0)
 			-- 使用 EASING_INBACK 会让门在消失前稍微放大一下再迅速缩小，很有打击感
 			go.animate(".", "scale", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_INBACK, 0.3, 0, function()
