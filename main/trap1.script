@@ -1,0 +1,127 @@
+-- 定义脚本属性，可以在编辑器中调整
+go.property("target_url", msg.url())     -- 要追踪的目标（在编辑器里把玩家对象拖进去）
+go.property("enabled", true)             -- 是否启用
+go.property("hover_height", 5.0)         -- 悬停高度
+go.property("track_duration", 3.0)       -- 追踪持续时间（秒）
+go.property("track_speed", 2.0)          -- 追踪时的平滑速度（越小越慢，越大越快）
+go.property("drop_speed", 25.0)          -- 下落砸击的速度
+go.property("rise_speed", 3.0)           -- 回升的速度
+go.property("ground_wait_time", 1.0)     -- 砸在地上停留的时间
+
+-- 定义状态枚举，方便阅读
+local STATE_TRACKING = 1
+local STATE_DROPPING = 2
+local STATE_WAITING = 3
+local STATE_RISING = 4
+
+function init(self)
+	self.state = STATE_TRACKING
+	self.timer = 0
+
+	-- 记录初始位置的Y作为地面高度（假设你在编辑器里把它放在了地面/凹槽底部）
+	-- 如果你在编辑器里已经是悬空的，请根据实际情况调整这里
+	local pos = go.get_position()
+	self.ground_y = pos.y 
+
+	-- 初始直接设置到高处
+	pos.y = self.ground_y + self.hover_height
+	go.set_position(pos)
+end
+
+
+
+-- 状态 1: 追踪逻辑
+local function update_tracking(self, dt)
+	self.timer = self.timer + dt
+
+	-- 检查是否有目标
+	if self.target_url then
+		-- 获取自身和目标的位置
+		local my_pos = go.get_position()
+		-- 保护措施：尝试获取目标位置，防止目标被删除后报错
+		local status, target_pos = pcall(go.get_position, self.target_url)
+
+		if status then
+			-- 我们只追踪 X 和 Z 轴，Y 轴保持悬停高度
+			target_pos.y = self.ground_y + self.hover_height
+
+			-- 使用 Lerp (线性插值) 实现平滑跟随
+			-- dt * self.track_speed 决定了平滑程度
+			local new_pos = vmath.lerp(dt * self.track_speed, my_pos, target_pos)
+			go.set_position(new_pos)
+		end
+	end
+
+	-- 追踪时间结束，切换到下落状态
+	if self.timer >= self.track_duration then
+		self.state = STATE_DROPPING
+		self.timer = 0
+		-- 可以在这里播放一个预警音效或动画
+		print("Trap: Smash down!") 
+	end
+end
+
+-- 状态 2: 下落逻辑
+local function update_dropping(self, dt)
+	local pos = go.get_position()
+	-- 向下移动
+	pos.y = pos.y - self.drop_speed * dt
+
+	-- 检测是否触底
+	if pos.y <= self.ground_y then
+		pos.y = self.ground_y -- 修正位置，防止穿地
+		self.state = STATE_WAITING
+		self.timer = 0
+
+		-- 可以在这里播放砸地音效或特效(比如灰尘)
+		-- msg.post("/sound#smash", "play_sound") 
+		-- particlefx.play("#dust")
+
+		-- 简单的“屏幕震动”效果逻辑可以加在这里
+		msg.post("camera", "shake", { intensity = 0.5 }) 
+	end
+
+	go.set_position(pos)
+end
+
+-- 状态 3: 等待逻辑
+local function update_waiting(self, dt)
+	self.timer = self.timer + dt
+	if self.timer >= self.ground_wait_time then
+		self.state = STATE_RISING
+	end
+end
+
+-- 状态 4: 回升逻辑
+local function update_rising(self, dt)
+	local pos = go.get_position()
+	-- 向上移动
+	pos.y = pos.y + self.rise_speed * dt
+
+	local target_height = self.ground_y + self.hover_height
+
+	-- 检测是否回到高度
+	if pos.y >= target_height then
+		pos.y = target_height
+		self.state = STATE_TRACKING
+		self.timer = 0
+	end
+
+	go.set_position(pos)
+end
+
+function update(self, dt)
+	-- 如果未启用，直接返回，不做任何事
+	if not self.enabled then return end
+
+	-- 状态机逻辑
+	if self.state == STATE_TRACKING then
+		update_tracking(self,dt)
+	elseif self.state == STATE_DROPPING then
+		update_dropping(self,dt)
+	elseif self.state == STATE_WAITING then
+		update_waiting(self,dt)
+	elseif self.state == STATE_RISING then
+		update_rising(self,dt)
+	end
+end
