@@ -1,0 +1,61 @@
+function init(self)
+	-- 初始化分数变量
+	self.score = 0
+
+	-- 确保 Label 一开始显示 0 (label 组件的名字叫 "score")
+	label.set_text("#score", tostring(self.score))
+
+	-- 保存初始缩放比例，以防万一
+	self.initial_label_scale = go.get("#score", "scale")
+end
+
+function final(self)
+
+end
+
+function update(self, dt)
+
+end
+
+function on_message(self, message_id, message, sender)
+	-- 2. 监听 "score" 消息
+	if message_id == hash("score") then
+
+		-- === 功能 A: 分数自增 ===
+		self.score = self.score + 1
+		label.set_text("#score", tostring(self.score))
+
+		-- === 功能 B: Label 缩放动画 (Q弹效果) ===
+		-- 先取消该组件上正在进行的缩放动画，防止冲突
+		go.cancel_animations("#score", "scale")
+		-- 重置为初始大小
+		go.set("#score", "scale", self.initial_label_scale)
+
+		-- 设置目标缩放大小 (比如放大到 1.5 倍)
+		local target_scale = self.initial_label_scale * 1.5
+
+		-- 使用 PingPong 模式：变大后自动变回原样
+		-- 参数：组件URL, 属性, 播放模式, 目标值, 缓动算法, 时间
+		go.animate("#score", "scale", go.PLAYBACK_ONCE_PINGPONG, target_scale, go.EASING_OUTBOUNCE, 0.2)
+
+		-- === 功能 C: 整个游戏对象晃动 (Shake) ===
+		-- 这里我们使用“旋转晃动”来实现，比改变位置更安全，不会跑偏
+
+		local shake_angle = 5 -- 晃动角度
+		local shake_speed = 0.05 -- 晃动速度（越小越快）
+
+		-- 取消之前的旋转动画并重置角度
+		go.cancel_animations(".", "euler.z")
+		go.set(".", "euler.z", 0)
+
+		-- 简单的三段式晃动：右 -> 左 -> 回正
+		-- 第一步：向右歪
+		go.animate(".", "euler.z", go.PLAYBACK_ONCE_FORWARD, shake_angle, go.EASING_LINEAR, shake_speed, 0, function()
+			-- 第二步：向左歪 (回调函数中执行)
+			go.animate(".", "euler.z", go.PLAYBACK_ONCE_FORWARD, -shake_angle, go.EASING_LINEAR, shake_speed * 2, 0, function()
+				-- 第三步：回正
+				go.animate(".", "euler.z", go.PLAYBACK_ONCE_FORWARD, 0, go.EASING_LINEAR, shake_speed)
+			end)
+		end)
+	end
+end

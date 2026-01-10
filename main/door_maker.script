@@ -88,5 +88,8 @@ function on_message(self, message_id, message, sender)
 	-- 监听来自Door的消息
 	if message_id == hash("door_destroyed") then
 		spawn_door(self)
+
+		-- 通知记分板计分
+		msg.post("main:/scoreboard", "score")
 	end
 end
