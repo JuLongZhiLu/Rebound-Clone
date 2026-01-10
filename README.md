@@ -1,4 +1,4 @@
-https://forum.defold.com/t/i-found-a-very-interesting-game-and-i-want-to-try-cloning-it-using-defold/82178
+https://forum.defold.com/t/open-source-i-found-a-very-interesting-game-and-i-want-to-try-cloning-it-using-defold/82178/33
 
 I didn't push V1 and V2 because I hadn't created a github repo at that time.
 
