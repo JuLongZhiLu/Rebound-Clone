@@ -26,6 +26,21 @@ function init(self)
 
 	-- 碰撞冷却计时器
 	self.collision_cooldown = 0 
+
+	-- 定义地图边界 (假设 10x10 是以原点为中心的 -5 到 5)
+	self.min_x = -5
+	self.max_x = 5
+	self.min_z = -5
+	self.max_z = 5
+end
+
+-- 一个辅助函数，用来防止角色走出特定的范围
+local function clamp_position(pos, min_x, max_x, min_z, max_z)
+	if pos.x > max_x then pos.x = max_x end
+	if pos.x < min_x then pos.x = min_x end
+	if pos.z > max_z then pos.z = max_z end
+	if pos.z < min_z then pos.z = min_z end
+	return pos
 end
 
 -- 一个辅助函数，用来切换动画
@@ -64,6 +79,9 @@ function update(self, dt)
 		new_pos.z = ball_pos.z + math.sin(self.angle) * self.radius
 		new_pos.y = ball_pos.y -- 保持深度一致
 
+		-- 在设置位置前限制它
+		new_pos = clamp_position(new_pos, self.min_x, self.max_x, self.min_z, self.max_z)
+			
 		-- 设置玩家位置
 		go.set_position(new_pos)
 
@@ -105,7 +123,13 @@ function update(self, dt)
 	if is_inputting and math.abs(dot) > 0.95 then
 		local move_dir = vmath.rotate(current_rot, vmath.vector3(0, 0, -1))
 		local pos = go.get_position()
-		go.set_position(pos + move_dir * -self.speed * dt)
+
+		local next_pos = pos + move_dir * -self.speed * dt
+
+		-- 【新增】在设置位置前限制它
+		next_pos = clamp_position(next_pos, self.min_x, self.max_x, self.min_z, self.max_z)
+
+		go.set_position(next_pos)
 	end
 
 	-- 重置输入向量
