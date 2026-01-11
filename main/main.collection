@@ -287,6 +287,7 @@ embedded_instances {
   "mask: \\\"default\\\"\\n"
   "mask: \\\"ball\\\"\\n"
   "mask: \\\"platform\\\"\\n"
+  "mask: \\\"trap\\\"\\n"
   "embedded_collision_shape {\\n"
   "  shapes {\\n"
   "    shape_type: TYPE_CAPSULE\\n"

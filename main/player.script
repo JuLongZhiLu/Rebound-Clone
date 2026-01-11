@@ -32,6 +32,9 @@ function init(self)
 	self.max_x = 5
 	self.min_z = -5
 	self.max_z = 5
+
+	-- 用于记录物理修正向量
+	self.correction = vmath.vector3()
 end
 
 -- 一个辅助函数，用来防止角色走出特定的范围
@@ -62,6 +65,9 @@ end
 
 
 function update(self, dt)
+
+	-- 每帧开始时，重置修正向量
+	self.correction = vmath.vector3()
 
 	-- 如果冷却时间大于0，就减去流逝的时间 dt
 	if self.collision_cooldown > 0 then
@@ -214,6 +220,30 @@ function on_message(self, message_id, message, sender)
 			local diff = my_pos - ball_pos
 			self.radius = 0.6
 			self.angle = math.atan2(diff.y, diff.x) -- 计算当前的初始角度
+		end
+		-- 3. 【新增】处理物理阻挡 (墙壁/障碍物)
+	elseif message_id == hash("contact_point_response") then
+
+		-- 障碍物的组名是 "trap"
+		if message.group == hash("trap") then
+
+			-- 如果穿透深度 > 0，说明陷进去了
+			if message.distance > 0 then
+				-- 计算投影：防止在角落时多次过度修正
+				-- 这是一个标准的数学公式，用来处理多个接触点
+				local proj = vmath.project(self.correction, message.normal * message.distance)
+
+				if proj < 1 then
+					-- 计算需要“推出来”的向量
+					local comp = (message.distance - message.distance * proj) * message.normal
+
+					-- 应用修正：直接修改位置
+					go.set_position(go.get_position() + comp)
+
+					-- 累加修正值
+					self.correction = self.correction + comp
+				end
+			end
 		end
 	end
 end
