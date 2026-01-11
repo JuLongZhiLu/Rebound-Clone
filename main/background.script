@@ -1,0 +1,12 @@
+-- flow_control.script
+go.property("speed", vmath.vector4(1.0, 0.0, 0.0, 0.0)) -- x=水平速度, y=垂直速度
+
+function init(self)
+	self.time = 0
+end
+
+function update(self, dt)
+	self.time = self.time + dt
+	-- 将时间和速度传递给 shader
+	sprite.set_constant("#sprite", "time_and_speed", vmath.vector4(self.time, self.speed.x, self.speed.y, 0))
+end

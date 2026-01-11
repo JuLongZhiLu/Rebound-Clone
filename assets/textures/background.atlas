@@ -1,0 +1,4 @@
+images {
+  image: "/assets/textures/background.png"
+}
+extrude_borders: 6

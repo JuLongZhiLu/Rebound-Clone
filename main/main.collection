@@ -116,6 +116,7 @@ instances {
 scale_along_z: 0
 embedded_instances {
   id: "environment"
+  children: "background"
   children: "buildings_wall_5x"
   children: "buildings_wall_5x1"
   children: "buildings_wall_5x2"
@@ -138,18 +139,23 @@ embedded_instances {
   "  component: \"/light_and_shadows/light_setting.script\"\n"
   "  properties {\n"
   "    id: \"clear_color\"\n"
-  "    value: \"0.05, 0.09, 0.13, 0.0\"\n"
+  "    value: \"0.0, 0.0, 0.0, 0.0\"\n"
   "    type: PROPERTY_TYPE_VECTOR4\n"
   "  }\n"
   "  properties {\n"
   "    id: \"fog_color\"\n"
-  "    value: \"0.05, 0.1, 0.3, 0.0\"\n"
+  "    value: \"0.0, 0.0, 0.0, 0.0\"\n"
   "    type: PROPERTY_TYPE_VECTOR4\n"
   "  }\n"
   "  properties {\n"
   "    id: \"fog_density\"\n"
   "    value: \"0.8\"\n"
   "    type: PROPERTY_TYPE_NUMBER\n"
+  "  }\n"
+  "  properties {\n"
+  "    id: \"fog_min_max\"\n"
+  "    value: \"10.0, 200.0, 1.0, 1.0\"\n"
+  "    type: PROPERTY_TYPE_VECTOR4\n"
   "  }\n"
   "  properties {\n"
   "    id: \"ambient\"\n"
@@ -896,5 +902,41 @@ embedded_instances {
     x: 1.5
     y: 1.5
     z: 1.5
+  }
+}
+embedded_instances {
+  id: "background"
+  data: "components {\n"
+  "  id: \"background\"\n"
+  "  component: \"/main/background.script\"\n"
+  "  properties {\n"
+  "    id: \"speed\"\n"
+  "    value: \"0.01, 0.0, 0.0, 0.0\"\n"
+  "    type: PROPERTY_TYPE_VECTOR4\n"
+  "  }\n"
+  "}\n"
+  "embedded_components {\n"
+  "  id: \"sprite\"\n"
+  "  type: \"sprite\"\n"
+  "  data: \"default_animation: \\\"background\\\"\\n"
+  "material: \\\"/assets/materials/flow.material\\\"\\n"
+  "size {\\n"
+  "  x: 500.0\\n"
+  "  y: 500.0\\n"
+  "}\\n"
+  "textures {\\n"
+  "  sampler: \\\"texture_sampler\\\"\\n"
+  "  texture: \\\"/assets/textures/background.atlas\\\"\\n"
+  "}\\n"
+  "\"\n"
+  "  position {\n"
+  "    y: 10.0\n"
+  "    z: 52.0\n"
+  "  }\n"
+  "}\n"
+  ""
+  scale3 {
+    x: 0.5
+    y: 0.5
   }
 }
